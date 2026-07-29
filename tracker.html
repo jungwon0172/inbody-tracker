@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인바디 기록 도구 — 회차별 기록 &amp; 비교 | 인바디 기록부</title>
+<meta name="description" content="인바디 결과를 측정할 때마다 입력해 회차별로 기록하고, 두 개 이상의 회차를 선택해 변화를 표와 화살표로 비교하는 무료 도구입니다.">
+<link rel="canonical" href="https://example.com/tracker.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;900&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="index.html">
+      <span class="mark">인바디 기록부</span>
+      <span class="sub">INBODY LEDGER</span>
+    </a>
+    <nav class="site-nav">
+      <a href="index.html">홈</a>
+      <a href="guide.html">항목별 가이드</a>
+      <a href="tracker.html" class="active">기록 도구</a>
+      <a href="about.html">소개</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-cover">
+  <div class="eyebrow">INBODY RECORD LEDGER</div>
+  <h1 class="title">인바디 기록 도구</h1>
+  <p class="lede">측정할 때마다 결과지를 그대로 옮겨 적어두는 카드입니다. 회차가 쌓이면 나란히 펼쳐 비교하세요. 기록은 이 브라우저에만 저장되며 외부로 전송되지 않습니다.</p>
+</div>
+
+<main class="content">
+  <div class="tool-tabs">
+    <button class="tab-btn active" data-tab="record">기록 추가</button>
+    <button class="tab-btn" data-tab="list">기록 목록 <span class="count" id="listCount">(0)</span></button>
+    <button class="tab-btn" data-tab="compare">비교하기</button>
+  </div>
+
+  <!-- ===== 기록 추가 ===== -->
+  <section class="tool-panel active" id="panel-record">
+    <div class="form-card">
+      <h2>새 측정 기록</h2>
+      <p class="form-hint">인바디 결과지를 보면서 값을 그대로 옮겨 적으세요. 날짜와 체중 외에는 선택 입력입니다.</p>
+      <form id="recordForm">
+        <div class="grid">
+          <div class="field"><label>측정일 <span class="req">*</span></label><input type="date" id="f_date" required></div>
+          <div class="field"><label>측정 시간대</label>
+            <select id="f_time">
+              <option value="">선택 안 함</option>
+              <option>기상 직후 공복</option>
+              <option>아침 식후</option>
+              <option>점심 전</option>
+              <option>운동 직후</option>
+              <option>저녁 식후</option>
+              <option>취침 전</option>
+            </select>
+          </div>
+          <div class="field"><label>체중 (kg) <span class="req">*</span></label><input type="number" step="0.1" id="f_weight" required></div>
+          <div class="field"><label>골격근량 (kg)</label><input type="number" step="0.1" id="f_smm"></div>
+          <div class="field"><label>체지방량 (kg)</label><input type="number" step="0.1" id="f_bfm"></div>
+          <div class="field"><label>체지방률 (%)</label><input type="number" step="0.1" id="f_pbf"></div>
+          <div class="field"><label>체수분 (L)</label><input type="number" step="0.1" id="f_water"></div>
+          <div class="field"><label>단백질 (kg)</label><input type="number" step="0.1" id="f_protein"></div>
+          <div class="field"><label>무기질 (kg)</label><input type="number" step="0.1" id="f_mineral"></div>
+          <div class="field"><label>내장지방레벨</label><input type="number" step="1" id="f_visceral"></div>
+          <div class="field"><label>기초대사량 (kcal)</label><input type="number" step="1" id="f_bmr"></div>
+          <div class="field"><label>인바디 점수</label><input type="number" step="1" id="f_score"></div>
+          <div class="field"><label>좌우 밸런스</label>
+            <select id="f_balance">
+              <option value="">선택 안 함</option>
+              <option>균형</option>
+              <option>왼쪽 우세</option>
+              <option>오른쪽 우세</option>
+            </select>
+          </div>
+          <div class="field"><label>이번 주 러닝 (km)</label><input type="number" step="0.1" id="f_running"></div>
+
+          <div class="field full">
+            <label>눈바디 사진 (선택)</label>
+            <div class="photo-drop" id="photoDrop">사진을 선택하려면 클릭하세요</div>
+            <input type="file" id="f_photo" accept="image/*" style="display:none">
+          </div>
+
+          <div class="field full">
+            <label>메모</label>
+            <textarea id="f_memo" placeholder="컨디션, 특이사항 등 (예: 전날 야식, 생리 전 등)"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="ghost" id="resetBtn">초기화</button>
+          <button type="submit" class="primary">기록 저장</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== 기록 목록 ===== -->
+  <section class="tool-panel" id="panel-list">
+    <div class="record-list" id="recordList"></div>
+    <div class="empty-state" id="listEmpty">
+      <div class="big">아직 기록이 없습니다</div>
+      "기록 추가" 탭에서 첫 번째 인바디 결과를 입력해보세요.
+    </div>
+  </section>
+
+  <!-- ===== 비교 ===== -->
+  <section class="tool-panel" id="panel-compare">
+    <div class="compare-bar">
+      <span id="compareStatus">기록 목록에서 비교할 회차의 체크박스를 선택하세요 (2개 이상)</span>
+      <button class="ghost" id="clearCompare" style="border-color:#5a6a63;color:#e6ddc4;">선택 초기화</button>
+    </div>
+    <div id="avgBanner"></div>
+    <div class="compare-table-wrap" id="compareWrap"></div>
+  </section>
+</main>
+
+<div class="ad-slot">
+  <div class="frame">광고 영역 · AdSense 승인 후 광고 코드가 이 위치에 삽입됩니다</div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div class="col">
+        <h4>둘러보기</h4>
+        <a href="index.html">홈</a>
+        <a href="guide.html">항목별 가이드</a>
+        <a href="tracker.html">기록 도구</a>
+      </div>
+      <div class="col">
+        <h4>사이트 정보</h4>
+        <a href="about.html">소개 &amp; 문의</a>
+        <a href="privacy.html">개인정보처리방침</a>
+        <a href="terms.html">이용약관</a>
+      </div>
+    </div>
+    <div class="legal">
+      © 2026 인바디 기록부. 총 <span id="footCount">0</span>건 기록됨 · 데이터는 이 브라우저에만 저장됩니다.
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const STORE_KEY = 'inbody_ledger_records_v1';
+
+  let storageAvailable = true;
+  let memoryFallback = null;
+  function safeGet(){
+    try{ return localStorage.getItem(STORE_KEY); }
+    catch(e){ storageAvailable = false; return memoryFallback; }
+  }
+  function safeSet(value){
+    try{ localStorage.setItem(STORE_KEY, value); }
+    catch(e){ storageAvailable = false; memoryFallback = value; }
+  }
+
+  let records = [];
+  try{ records = JSON.parse(safeGet() || '[]'); } catch(e){ records = []; }
+  let compareSelection = new Set();
+
+  const $ = (id) => document.getElementById(id);
+
+  function showStorageWarningIfNeeded(){
+    if(storageAvailable) return;
+    const banner = document.createElement('div');
+    banner.className = 'storage-warning';
+    banner.textContent = '⚠ 이 미리보기 환경에서는 로컬 저장이 차단되어, 기록이 화면을 벗어나면(새로고침 등) 사라집니다. 파일을 다운로드해 브라우저로 직접 열면 정상적으로 저장됩니다.';
+    const cover = document.querySelector('.page-cover');
+    cover.parentNode.insertBefore(banner, cover.nextSibling);
+  }
+
+  const METRIC_DEFS = [
+    { key:'weight',   label:'체중', unit:'kg', decimals:1 },
+    { key:'smm',      label:'골격근량', unit:'kg', decimals:1 },
+    { key:'bfm',      label:'체지방량', unit:'kg', decimals:1 },
+    { key:'pbf',      label:'체지방률', unit:'%', decimals:1 },
+    { key:'water',    label:'체수분', unit:'L', decimals:1 },
+    { key:'protein',  label:'단백질', unit:'kg', decimals:1 },
+    { key:'mineral',  label:'무기질', unit:'kg', decimals:1 },
+    { key:'visceral', label:'내장지방레벨', unit:'', decimals:0 },
+    { key:'bmr',      label:'기초대사량', unit:'kcal', decimals:0 },
+    { key:'score',    label:'인바디 점수', unit:'점', decimals:0 },
+  ];
+  const LOWER_IS_BETTER = new Set(['bfm','pbf','visceral']);
+
+  function save(){ safeSet(JSON.stringify(records)); renderAll(); }
+  function fmt(v, decimals){
+    if(v === null || v === undefined || v === '' || isNaN(v)) return '—';
+    return Number(v).toFixed(decimals);
+  }
+
+  function switchTab(tab){
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+    $('panel-' + tab).classList.add('active');
+  }
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
+  });
+
+  let pendingPhoto = null;
+  $('photoDrop').addEventListener('click', ()=> $('f_photo').click());
+  $('f_photo').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      pendingPhoto = ev.target.result;
+      $('photoDrop').innerHTML = `<img src="${pendingPhoto}"><div>사진 선택됨 (다시 클릭하면 변경)</div>`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  $('recordForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const rec = {
+      id: 'r' + Date.now(),
+      date: $('f_date').value,
+      time: $('f_time').value,
+      weight: $('f_weight').value,
+      smm: $('f_smm').value,
+      bfm: $('f_bfm').value,
+      pbf: $('f_pbf').value,
+      water: $('f_water').value,
+      protein: $('f_protein').value,
+      mineral: $('f_mineral').value,
+      visceral: $('f_visceral').value,
+      bmr: $('f_bmr').value,
+      score: $('f_score').value,
+      balance: $('f_balance').value,
+      running: $('f_running').value,
+      memo: $('f_memo').value,
+      photo: pendingPhoto,
+    };
+    records.push(rec);
+    records.sort((a,b)=> a.date.localeCompare(b.date));
+    save();
+    $('recordForm').reset();
+    pendingPhoto = null;
+    $('photoDrop').innerHTML = '사진을 선택하려면 클릭하세요';
+    switchTab('list');
+  });
+
+  $('resetBtn').addEventListener('click', ()=>{
+    $('recordForm').reset();
+    pendingPhoto = null;
+    $('photoDrop').innerHTML = '사진을 선택하려면 클릭하세요';
+  });
+
+  function deleteRecord(id){
+    if(!confirm('이 기록을 삭제할까요? 되돌릴 수 없습니다.')) return;
+    records = records.filter(r=>r.id!==id);
+    compareSelection.delete(id);
+    save();
+  }
+  function toggleCompare(id, checked){
+    if(checked) compareSelection.add(id); else compareSelection.delete(id);
+    renderCompare();
+    renderList();
+  }
+  $('clearCompare').addEventListener('click', ()=>{
+    compareSelection.clear();
+    renderCompare();
+    renderList();
+  });
+
+  function renderList(){
+    const wrap = $('recordList');
+    const empty = $('listEmpty');
+    $('listCount').textContent = `(${records.length})`;
+    $('footCount').textContent = `${records.length}`;
+    if(records.length === 0){
+      wrap.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    const sorted = [...records].sort((a,b)=> b.date.localeCompare(a.date));
+
+    wrap.innerHTML = sorted.map((r) => {
+      const selected = compareSelection.has(r.id);
+      const seqNo = String(records.length - records.findIndex(x=>x.id===r.id)).padStart(3,'0');
+      const metricsHtml = METRIC_DEFS.map(m=>{
+        const v = r[m.key];
+        if(v==='' || v===undefined || v===null) return '';
+        return `<div class="metric"><div class="k">${m.label}</div><div class="v">${fmt(v, m.decimals)}<span class="unit">${m.unit}</span></div></div>`;
+      }).join('');
+      return `
+      <div class="rcard ${selected ? 'selected':''}">
+        <div class="tab">
+          <div class="hole"></div>
+          <div class="seq">NO.${seqNo}</div>
+        </div>
+        <div class="body">
+          ${r.photo ? `<img class="thumb" src="${r.photo}">` : ''}
+          <div class="rhead">
+            <span class="date">${r.date}</span>
+            ${r.time ? `<span class="condition">${r.time}</span>` : ''}
+            ${r.running ? `<span class="condition">주간 러닝 ${r.running}km</span>` : ''}
+            <div class="rhead-actions">
+              <label><input type="checkbox" ${selected?'checked':''} onchange="window.__inbody.toggleCompare('${r.id}', this.checked)"> 비교</label>
+              <button class="del" onclick="window.__inbody.deleteRecord('${r.id}')">삭제</button>
+            </div>
+          </div>
+          <div class="metrics">${metricsHtml || '<div class="metric"><div class="k">비고</div><div class="v">기본 항목만 입력됨</div></div>'}</div>
+          ${r.balance ? `<div class="memo"><b>밸런스</b> · ${r.balance}${r.memo ? ' · ' + r.memo : ''}</div>` : (r.memo ? `<div class="memo">${r.memo}</div>` : '')}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderCompare(){
+    const wrap = $('compareWrap');
+    const status = $('compareStatus');
+    const avgBanner = $('avgBanner');
+    const selected = records.filter(r=>compareSelection.has(r.id)).sort((a,b)=>a.date.localeCompare(b.date));
+
+    if(selected.length < 2){
+      status.textContent = `기록 목록에서 비교할 회차의 체크박스를 선택하세요 (현재 ${selected.length}개 선택됨, 2개 이상 필요)`;
+      wrap.innerHTML = `<div class="compare-empty">2개 이상의 기록을 선택하면 나란히 비교표가 나타납니다.</div>`;
+      avgBanner.innerHTML = '';
+      return;
+    }
+    status.textContent = `${selected.length}개 회차 비교 중 (${selected[0].date} → ${selected[selected.length-1].date})`;
+
+    const allSorted = [...records].sort((a,b)=>b.date.localeCompare(a.date));
+    if(allSorted.length >= 2){
+      const recent3 = allSorted.slice(0,3);
+      const latest = allSorted[0];
+      const valid = recent3.filter(r=>r.weight!=='');
+      const avgWeight = valid.length ? valid.reduce((s,r)=> s + (parseFloat(r.weight)||0),0) / valid.length : null;
+      if(avgWeight){
+        const diff = (parseFloat(latest.weight) - avgWeight);
+        avgBanner.innerHTML = `<div class="avg-banner"><span><b>최근 ${recent3.length}회 평균 체중</b> ${avgWeight.toFixed(1)}kg</span><span><span class="tag">이번 회차</span> ${fmt(latest.weight,1)}kg (${diff>=0?'+':''}${diff.toFixed(1)}kg)</span></div>`;
+      } else { avgBanner.innerHTML = ''; }
+    } else { avgBanner.innerHTML = ''; }
+
+    let html = `<table class="compare"><thead><tr><th>항목</th>`;
+    selected.forEach(r=> html += `<th>${r.date}${r.time ? `<br><span style="font-weight:400;font-size:11px;color:var(--ink-soft)">${r.time}</span>`:''}</th>`);
+    html += `</tr></thead><tbody>`;
+
+    METRIC_DEFS.forEach(m=>{
+      const anyVal = selected.some(r=> r[m.key] !== '' && r[m.key] !== undefined);
+      if(!anyVal) return;
+      html += `<tr><th>${m.label}<br><span style="font-size:10px;">${m.unit||''}</span></th>`;
+      selected.forEach((r,i)=>{
+        const v = r[m.key];
+        const num = v==='' || v===undefined ? null : parseFloat(v);
+        let deltaHtml = '';
+        if(i>0 && num !== null){
+          const prev = selected[i-1][m.key];
+          const prevNum = prev==='' || prev===undefined ? null : parseFloat(prev);
+          if(prevNum !== null){
+            const d = num - prevNum;
+            let cls = 'flat';
+            if(Math.abs(d) > 0.001){
+              const better = LOWER_IS_BETTER.has(m.key) ? d < 0 : d > 0;
+              cls = better ? 'up' : 'down';
+            }
+            const sign = d>0?'+':'';
+            deltaHtml = `<span class="delta ${cls}">${cls==='up'?'▲':cls==='down'?'▼':'–'} ${sign}${d.toFixed(m.decimals)}</span>`;
+          }
+        }
+        html += `<td>${fmt(v, m.decimals)}${deltaHtml}</td>`;
+      });
+      html += `</tr>`;
+    });
+
+    if(selected.some(r=>r.balance)){
+      html += `<tr><th>좌우 밸런스</th>`;
+      selected.forEach(r=> html += `<td>${r.balance || '—'}</td>`);
+      html += `</tr>`;
+    }
+    if(selected.some(r=>r.running)){
+      html += `<tr><th>주간 러닝<br><span style="font-size:10px;">km</span></th>`;
+      selected.forEach(r=> html += `<td>${r.running || '—'}</td>`);
+      html += `</tr>`;
+    }
+    html += `</tbody></table>`;
+    wrap.innerHTML = html;
+  }
+
+  function renderAll(){ renderList(); renderCompare(); }
+  window.__inbody = { deleteRecord, toggleCompare };
+
+  $('f_date').value = new Date().toISOString().slice(0,10);
+  renderAll();
+  showStorageWarningIfNeeded();
+})();
+</script>
+
+</body>
+</html>
