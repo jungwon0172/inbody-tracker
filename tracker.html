@@ -63,6 +63,8 @@
             </select>
           </div>
           <div class="field"><label>체중 (kg) <span class="req">*</span></label><input type="number" step="0.1" id="f_weight" required></div>
+          <div class="field"><label>신장 (cm)</label><input type="number" step="0.1" id="f_height"></div>
+          <div class="field"><label>BMI</label><input type="number" step="0.1" id="f_bmi" placeholder="자동 계산"></div>
           <div class="field"><label>골격근량 (kg)</label><input type="number" step="0.1" id="f_smm"></div>
           <div class="field"><label>체지방량 (kg)</label><input type="number" step="0.1" id="f_bfm"></div>
           <div class="field"><label>체지방률 (%)</label><input type="number" step="0.1" id="f_pbf"></div>
@@ -118,6 +120,13 @@
       <button class="ghost" id="clearCompare" style="border-color:#5a6a63;color:#e6ddc4;">선택 초기화</button>
     </div>
     <div id="avgBanner"></div>
+
+    <div class="chart-controls" id="chartControls" style="display:none;">
+      <label for="chartMetric">막대그래프로 볼 항목</label>
+      <select id="chartMetric"></select>
+    </div>
+    <div id="chartWrap"></div>
+
     <div class="compare-table-wrap" id="compareWrap"></div>
   </section>
 </main>
@@ -180,6 +189,8 @@
 
   const METRIC_DEFS = [
     { key:'weight',   label:'체중', unit:'kg', decimals:1 },
+    { key:'height',   label:'신장', unit:'cm', decimals:1 },
+    { key:'bmi',      label:'BMI', unit:'', decimals:1 },
     { key:'smm',      label:'골격근량', unit:'kg', decimals:1 },
     { key:'bfm',      label:'체지방량', unit:'kg', decimals:1 },
     { key:'pbf',      label:'체지방률', unit:'%', decimals:1 },
@@ -191,6 +202,7 @@
     { key:'score',    label:'인바디 점수', unit:'점', decimals:0 },
   ];
   const LOWER_IS_BETTER = new Set(['bfm','pbf','visceral']);
+  const NEUTRAL_METRICS = new Set(['bmi','height']); // 증감을 좋다/나쁘다로 단정하지 않는 지표
 
   function save(){ safeSet(JSON.stringify(records)); renderAll(); }
   function fmt(v, decimals){
@@ -206,6 +218,17 @@
   document.querySelectorAll('.tab-btn').forEach(btn=>{
     btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
   });
+
+  function autoCalcBmi(){
+    const w = parseFloat($('f_weight').value);
+    const h = parseFloat($('f_height').value);
+    if(w && h){
+      const bmi = w / Math.pow(h/100, 2);
+      $('f_bmi').value = bmi.toFixed(1);
+    }
+  }
+  $('f_weight').addEventListener('input', autoCalcBmi);
+  $('f_height').addEventListener('input', autoCalcBmi);
 
   let pendingPhoto = null;
   $('photoDrop').addEventListener('click', ()=> $('f_photo').click());
@@ -227,6 +250,8 @@
       date: $('f_date').value,
       time: $('f_time').value,
       weight: $('f_weight').value,
+      height: $('f_height').value,
+      bmi: $('f_bmi').value,
       smm: $('f_smm').value,
       bfm: $('f_bfm').value,
       pbf: $('f_pbf').value,
@@ -328,6 +353,8 @@
       status.textContent = `기록 목록에서 비교할 회차의 체크박스를 선택하세요 (현재 ${selected.length}개 선택됨, 2개 이상 필요)`;
       wrap.innerHTML = `<div class="compare-empty">2개 이상의 기록을 선택하면 나란히 비교표가 나타납니다.</div>`;
       avgBanner.innerHTML = '';
+      $('chartControls').style.display = 'none';
+      $('chartWrap').innerHTML = '';
       return;
     }
     status.textContent = `${selected.length}개 회차 비교 중 (${selected[0].date} → ${selected[selected.length-1].date})`;
@@ -362,12 +389,18 @@
           if(prevNum !== null){
             const d = num - prevNum;
             let cls = 'flat';
+            let arrow = '–';
             if(Math.abs(d) > 0.001){
-              const better = LOWER_IS_BETTER.has(m.key) ? d < 0 : d > 0;
-              cls = better ? 'up' : 'down';
+              arrow = d > 0 ? '▲' : '▼';
+              if(NEUTRAL_METRICS.has(m.key)){
+                cls = 'neutral';
+              } else {
+                const better = LOWER_IS_BETTER.has(m.key) ? d < 0 : d > 0;
+                cls = better ? 'up' : 'down';
+              }
             }
             const sign = d>0?'+':'';
-            deltaHtml = `<span class="delta ${cls}">${cls==='up'?'▲':cls==='down'?'▼':'–'} ${sign}${d.toFixed(m.decimals)}</span>`;
+            deltaHtml = `<span class="delta ${cls}">${arrow} ${sign}${d.toFixed(m.decimals)}</span>`;
           }
         }
         html += `<td>${fmt(v, m.decimals)}${deltaHtml}</td>`;
@@ -387,6 +420,73 @@
     }
     html += `</tbody></table>`;
     wrap.innerHTML = html;
+
+    renderChartControls(selected);
+  }
+
+  function renderChartControls(selected){
+    const controls = $('chartControls');
+    const select = $('chartMetric');
+    const available = METRIC_DEFS.filter(m => selected.some(r => r[m.key] !== '' && r[m.key] !== undefined));
+    if(available.length === 0){
+      controls.style.display = 'none';
+      $('chartWrap').innerHTML = '';
+      return;
+    }
+    controls.style.display = 'flex';
+
+    const prevValue = select.value;
+    const keep = available.some(m => m.key === prevValue);
+    select.innerHTML = available.map(m => `<option value="${m.key}">${m.label}${m.unit ? ' ('+m.unit+')' : ''}</option>`).join('');
+    select.value = keep ? prevValue : (available.find(m=>m.key==='weight') ? 'weight' : available[0].key);
+
+    renderBarChart(selected, select.value);
+  }
+
+  $('chartMetric').addEventListener('change', ()=>{
+    const selected = records.filter(r=>compareSelection.has(r.id)).sort((a,b)=>a.date.localeCompare(b.date));
+    renderBarChart(selected, $('chartMetric').value);
+  });
+
+  function renderBarChart(selected, metricKey){
+    const def = METRIC_DEFS.find(m => m.key === metricKey);
+    const wrap = $('chartWrap');
+    if(!def){ wrap.innerHTML = ''; return; }
+
+    const points = selected
+      .filter(r => r[metricKey] !== '' && r[metricKey] !== undefined)
+      .map(r => ({ date: r.date, time: r.time, value: parseFloat(r[metricKey]) }));
+
+    if(points.length < 2){
+      wrap.innerHTML = `<div class="compare-empty">선택된 회차 중 '${def.label}' 값이 2개 이상 있어야 그래프로 표시됩니다.</div>`;
+      return;
+    }
+
+    const values = points.map(p => p.value);
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const range = max - min;
+    const maxVal = max;
+
+    const bars = points.map(p => {
+      let pct;
+      if(range < 0.0001){ pct = 60; }
+      else{ pct = 18 + ((p.value - min) / range) * 78; } // 18%~96% 사이로 스케일, 최솟값도 보이게
+      const isMax = p.value === maxVal;
+      return `<div class="bar-col ${isMax ? 'is-max' : ''}">
+        <div class="bar-value">${p.value.toFixed(def.decimals)}${def.unit ? '<span style=\"font-weight:400;color:var(--ink-soft);font-size:10px;\"> '+def.unit+'</span>' : ''}</div>
+        <div class="bar-shape" style="height:${pct}%;"></div>
+      </div>`;
+    }).join('');
+
+    const labels = points.map(p => `<div class="bar-label">${p.date.slice(5)}${p.time ? `<br>${p.time}` : ''}</div>`).join('');
+
+    wrap.innerHTML = `
+      <div class="bar-chart">
+        <div class="chart-title">${def.label} 변화 타임라인 (${points[0].date} → ${points[points.length-1].date})</div>
+        <div class="bar-track">${bars}</div>
+        <div class="bar-labels">${labels}</div>
+      </div>`;
   }
 
   function renderAll(){ renderList(); renderCompare(); }

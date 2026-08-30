@@ -626,3 +626,90 @@ table.compare td{ font-family:'IBM Plex Mono', monospace; }
   .rcard .tab .seq{ writing-mode: horizontal-tb; }
   .rcard .thumb{ position: static; margin-bottom: 8px; }
 }
+
+/* ===== Compare bar chart ===== */
+.chart-controls{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  margin: 18px 0 10px;
+  flex-wrap: wrap;
+}
+.chart-controls label{
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+.chart-controls select{
+  font-family:'Noto Sans KR', sans-serif;
+  font-size: 13.5px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fffefb;
+  color: var(--ink);
+}
+.bar-chart{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 24px 20px 14px;
+  margin-bottom: 20px;
+}
+.bar-chart .chart-title{
+  font-family:'Noto Serif KR', serif;
+  font-size: 14px;
+  color: var(--teal-dark);
+  margin-bottom: 18px;
+}
+.bar-track{
+  display:flex;
+  align-items:flex-end;
+  gap: 14px;
+  min-height: 200px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--line-soft);
+  overflow-x: auto;
+}
+.bar-col{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  min-width: 40px;
+  height: 200px;
+}
+.bar-col .bar-value{
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight:600;
+  color: var(--teal-dark);
+  margin-bottom: 6px;
+  white-space: nowrap;
+}
+.bar-col .bar-shape{
+  width: 100%;
+  max-width: 46px;
+  background: linear-gradient(180deg, var(--teal) 0%, var(--teal-dark) 100%);
+  border-radius: 6px 6px 2px 2px;
+  transition: height .4s ease;
+  position: relative;
+}
+.bar-col.is-max .bar-shape{ background: linear-gradient(180deg, var(--brass) 0%, #8a6a22 100%); }
+.bar-labels{
+  display:flex;
+  gap: 14px;
+  padding: 8px 4px 0;
+}
+.bar-labels .bar-label{
+  flex:1;
+  min-width: 40px;
+  text-align:center;
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.delta.neutral{ color: var(--ink-soft); }
