@@ -157,6 +157,19 @@
   </div>
 </footer>
 
+<div class="lightbox" id="lightbox" hidden>
+  <div class="lightbox-inner" role="dialog" aria-modal="true" aria-label="눈바디 사진 크게 보기">
+    <img id="lightboxImg" alt="">
+    <div class="lightbox-bar">
+      <span id="lightboxCaption"></span>
+      <span class="lightbox-actions">
+        <a id="lightboxDownload" class="btn" href="#" download="inbody.jpg">사진 저장</a>
+        <button type="button" class="ghost" id="lightboxClose">닫기</button>
+      </span>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   const STORE_KEY = 'inbody_ledger_records_v1';
@@ -237,8 +250,23 @@
     if(!file) return;
     const reader = new FileReader();
     reader.onload = (ev)=>{
-      pendingPhoto = ev.target.result;
-      $('photoDrop').innerHTML = `<img src="${pendingPhoto}"><div>사진 선택됨 (다시 클릭하면 변경)</div>`;
+      const img = new Image();
+      img.onload = ()=>{
+        // 긴 변 기준 1200px로 줄이고 JPEG로 압축 (로컬 저장 용량 절약)
+        const MAX = 1200;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        pendingPhoto = canvas.toDataURL('image/jpeg', 0.82);
+        $('photoDrop').innerHTML = `<img src="${pendingPhoto}" alt="선택한 사진 미리보기"><div>사진 선택됨 (다시 클릭하면 변경)</div>`;
+      };
+      img.onerror = ()=>{
+        pendingPhoto = ev.target.result;
+        $('photoDrop').innerHTML = `<img src="${pendingPhoto}" alt="선택한 사진 미리보기"><div>사진 선택됨 (다시 클릭하면 변경)</div>`;
+      };
+      img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
   });
@@ -326,7 +354,6 @@
           <div class="seq">NO.${seqNo}</div>
         </div>
         <div class="body">
-          ${r.photo ? `<img class="thumb" src="${r.photo}">` : ''}
           <div class="rhead">
             <span class="date">${r.date}</span>
             ${r.time ? `<span class="condition">${r.time}</span>` : ''}
@@ -337,6 +364,10 @@
             </div>
           </div>
           <div class="metrics">${metricsHtml || '<div class="metric"><div class="k">비고</div><div class="v">기본 항목만 입력됨</div></div>'}</div>
+          ${r.photo ? `<button type="button" class="photo-btn" onclick="window.__inbody.openPhoto('${r.id}')" aria-label="눈바디 사진 크게 보기">
+            <img src="${r.photo}" alt="${r.date} 눈바디 사진">
+            <span class="photo-hint">눈바디 · 클릭하면 크게 보기</span>
+          </button>` : ''}
           ${r.balance ? `<div class="memo"><b>밸런스</b> · ${r.balance}${r.memo ? ' · ' + r.memo : ''}</div>` : (r.memo ? `<div class="memo">${r.memo}</div>` : '')}
         </div>
       </div>`;
@@ -490,7 +521,28 @@
   }
 
   function renderAll(){ renderList(); renderCompare(); }
-  window.__inbody = { deleteRecord, toggleCompare };
+  function openPhoto(id){
+    const r = records.find(x=>x.id===id);
+    if(!r || !r.photo) return;
+    $('lightboxImg').src = r.photo;
+    $('lightboxImg').alt = `${r.date} 눈바디 사진`;
+    $('lightboxCaption').textContent = `${r.date} 눈바디`;
+    const dl = $('lightboxDownload');
+    dl.href = r.photo;
+    dl.download = `inbody-nunbody-${r.date}.jpg`;
+    $('lightbox').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closePhoto(){
+    $('lightbox').hidden = true;
+    $('lightboxImg').src = '';
+    document.body.style.overflow = '';
+  }
+  $('lightboxClose').addEventListener('click', closePhoto);
+  $('lightbox').addEventListener('click', (e)=>{ if(e.target === $('lightbox')) closePhoto(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && !$('lightbox').hidden) closePhoto(); });
+
+  window.__inbody = { deleteRecord, toggleCompare, openPhoto };
 
   $('f_date').value = new Date().toISOString().slice(0,10);
   renderAll();
