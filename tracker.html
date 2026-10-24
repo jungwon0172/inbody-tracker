@@ -5,14 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>인바디 기록 도구 — 회차별 기록 &amp; 비교 | 인바디 기록부</title>
 <meta name="description" content="인바디 결과를 측정할 때마다 입력해 회차별로 기록하고, 두 개 이상의 회차를 선택해 변화를 표와 화살표로 비교하는 무료 도구입니다.">
-<link rel="canonical" href="https://example.com/tracker.html">
+<link rel="canonical" href="https://inbody-tracker-vert.vercel.app/tracker.html">
 <meta name="naver-site-verification" content="7c5803e0667ca97e8ee6781f5c3fd69aa331b6ec" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;900&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2557338953436433"
      crossorigin="anonymous"></script>
 <link rel="stylesheet" href="css/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "인바디 기록 도구",
+  "url": "https://inbody-tracker-vert.vercel.app/tracker.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "ko-KR",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "KRW"
+  },
+  "description": "인바디 측정 결과를 회차별로 기록하고 여러 회차를 표와 막대그래프로 비교하는 무료 웹 도구",
+  "featureList": [
+    "회차별 인바디 기록",
+    "여러 회차 비교표와 증감 표시",
+    "막대그래프 타임라인",
+    "BMI 자동 계산",
+    "눈바디 사진 보관",
+    "JSON·CSV 내보내기"
+  ]
+}
+</script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -33,25 +60,32 @@
 <div class="page-cover">
   <div class="eyebrow">INBODY RECORD LEDGER</div>
   <h1 class="title">인바디 기록 도구</h1>
-  <p class="lede">측정할 때마다 결과지를 그대로 옮겨 적어두는 카드입니다. 회차가 쌓이면 나란히 펼쳐 비교하세요. 기록은 이 브라우저에만 저장되며 외부로 전송되지 않습니다.</p>
+  <p class="lede">측정할 때마다 결과를 입력해 두면 회차별로 쌓이고, 두 회차만 골라도 변화가 표와 그래프로 나옵니다. 기록은 이 브라우저에만 저장되며 외부로 전송되지 않아요.</p>
 </div>
 
 <main class="content">
-  <div class="tool-tabs">
-    <button class="tab-btn active" data-tab="record">기록 추가</button>
-    <button class="tab-btn" data-tab="list">기록 목록 <span class="count" id="listCount">(0)</span></button>
-    <button class="tab-btn" data-tab="compare">비교하기</button>
+  <ol class="steps-hint" aria-label="사용 순서">
+    <li><b>1</b> 결과지 보고 <em>기록 추가</em></li>
+    <li><b>2</b> 기록이 쌓이면 <em>비교하기</em></li>
+    <li><b>3</b> 가끔 <em>내보내기</em>로 백업</li>
+  </ol>
+
+  <div class="tool-tabs" role="tablist">
+    <button class="tab-btn active" data-tab="record" role="tab">기록 추가</button>
+    <button class="tab-btn" data-tab="list" role="tab">기록 목록 <span class="count" id="listCount">(0)</span></button>
+    <button class="tab-btn" data-tab="compare" role="tab">비교하기</button>
   </div>
 
-  <!-- ===== 기록 추가 ===== -->
+  <!-- ===== 기록 추가 / 수정 ===== -->
   <section class="tool-panel active" id="panel-record">
     <div class="form-card">
-      <h2>새 측정 기록</h2>
-      <p class="form-hint">인바디 결과지를 보면서 값을 그대로 옮겨 적으세요. 날짜와 체중 외에는 선택 입력입니다.</p>
+      <h2 id="formTitle">새 측정 기록</h2>
+      <p class="form-hint" id="formHint">날짜와 체중만 입력해도 저장돼요. 나머지는 지금 채워도 되고, 나중에 <b>수정</b>으로 채워도 됩니다.</p>
       <form id="recordForm">
         <div class="grid">
-          <div class="field"><label>측정일 <span class="req">*</span></label><input type="date" id="f_date" required></div>
-          <div class="field"><label>측정 시간대</label>
+          <div class="group-title">기본 정보</div>
+          <div class="field"><label for="f_date">측정일 <span class="req">*</span></label><input type="date" id="f_date" required></div>
+          <div class="field"><label for="f_time">측정 시간대</label>
             <select id="f_time">
               <option value="">선택 안 함</option>
               <option>기상 직후 공복</option>
@@ -62,19 +96,23 @@
               <option>취침 전</option>
             </select>
           </div>
-          <div class="field"><label>체중 (kg) <span class="req">*</span></label><input type="number" step="0.1" id="f_weight" required></div>
-          <div class="field"><label>신장 (cm)</label><input type="number" step="0.1" id="f_height"></div>
-          <div class="field"><label>BMI</label><input type="number" step="0.1" id="f_bmi" placeholder="자동 계산"></div>
-          <div class="field"><label>골격근량 (kg)</label><input type="number" step="0.1" id="f_smm"></div>
-          <div class="field"><label>체지방량 (kg)</label><input type="number" step="0.1" id="f_bfm"></div>
-          <div class="field"><label>체지방률 (%)</label><input type="number" step="0.1" id="f_pbf"></div>
-          <div class="field"><label>체수분 (L)</label><input type="number" step="0.1" id="f_water"></div>
-          <div class="field"><label>단백질 (kg)</label><input type="number" step="0.1" id="f_protein"></div>
-          <div class="field"><label>무기질 (kg)</label><input type="number" step="0.1" id="f_mineral"></div>
-          <div class="field"><label>내장지방레벨</label><input type="number" step="1" id="f_visceral"></div>
-          <div class="field"><label>기초대사량 (kcal)</label><input type="number" step="1" id="f_bmr"></div>
-          <div class="field"><label>인바디 점수</label><input type="number" step="1" id="f_score"></div>
-          <div class="field"><label>좌우 밸런스</label>
+          <div class="field"><label for="f_weight">체중 (kg) <span class="req">*</span></label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_weight" placeholder="예: 65.4" required></div>
+          <div class="field"><label for="f_height">신장 (cm)</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_height" placeholder="예: 170"></div>
+          <div class="field"><label for="f_bmi">BMI</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_bmi" placeholder="자동 계산"></div>
+
+          <div class="group-title">체성분</div>
+          <div class="field"><label for="f_smm">골격근량 (kg)</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_smm"></div>
+          <div class="field"><label for="f_bfm">체지방량 (kg)</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_bfm"></div>
+          <div class="field"><label for="f_pbf">체지방률 (%)</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_pbf"></div>
+          <div class="field"><label for="f_water">체수분 (L)</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_water"></div>
+          <div class="field"><label for="f_protein">단백질 (kg)</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_protein"></div>
+          <div class="field"><label for="f_mineral">무기질 (kg)</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_mineral"></div>
+
+          <div class="group-title">건강 지표</div>
+          <div class="field"><label for="f_visceral">내장지방레벨</label><input type="number" inputmode="numeric" step="1" min="0" id="f_visceral"></div>
+          <div class="field"><label for="f_bmr">기초대사량 (kcal)</label><input type="number" inputmode="numeric" step="1" min="0" id="f_bmr"></div>
+          <div class="field"><label for="f_score">인바디 점수</label><input type="number" inputmode="numeric" step="1" min="0" id="f_score"></div>
+          <div class="field"><label for="f_balance">좌우 밸런스</label>
             <select id="f_balance">
               <option value="">선택 안 함</option>
               <option>균형</option>
@@ -82,23 +120,26 @@
               <option>오른쪽 우세</option>
             </select>
           </div>
-          <div class="field"><label>이번 주 러닝 (km)</label><input type="number" step="0.1" id="f_running"></div>
+
+          <div class="group-title">기타</div>
+          <div class="field"><label for="f_running">이번 주 러닝 (km)</label><input type="number" inputmode="decimal" step="0.1" min="0" id="f_running"></div>
 
           <div class="field full">
             <label>눈바디 사진 (선택)</label>
-            <div class="photo-drop" id="photoDrop">사진을 선택하려면 클릭하세요</div>
+            <div class="photo-drop" id="photoDrop" role="button" tabindex="0">사진을 선택하려면 클릭하세요</div>
             <input type="file" id="f_photo" accept="image/*" style="display:none">
           </div>
 
           <div class="field full">
-            <label>메모</label>
+            <label for="f_memo">메모</label>
             <textarea id="f_memo" placeholder="컨디션, 특이사항 등 (예: 전날 야식, 생리 전 등)"></textarea>
           </div>
         </div>
 
         <div class="form-actions">
+          <button type="button" class="ghost" id="cancelEdit" style="display:none;">수정 취소</button>
           <button type="button" class="ghost" id="resetBtn">초기화</button>
-          <button type="submit" class="primary">기록 저장</button>
+          <button type="submit" class="primary" id="submitBtn">기록 저장</button>
         </div>
       </form>
     </div>
@@ -106,10 +147,22 @@
 
   <!-- ===== 기록 목록 ===== -->
   <section class="tool-panel" id="panel-list">
+    <div class="list-tools" id="listTools">
+      <span class="tools-label">백업 · 이동</span>
+      <button type="button" class="ghost" id="exportJson">내보내기 (JSON)</button>
+      <button type="button" class="ghost" id="exportCsv">엑셀용 CSV</button>
+      <button type="button" class="ghost" id="importBtn">가져오기</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </div>
+    <div id="listExtra"></div>
     <div class="record-list" id="recordList"></div>
     <div class="empty-state" id="listEmpty">
       <div class="big">아직 기록이 없습니다</div>
-      "기록 추가" 탭에서 첫 번째 인바디 결과를 입력해보세요.
+      <p style="margin:0 0 16px;">첫 기록을 입력하거나, 예시 데이터로 먼저 둘러볼 수 있어요.</p>
+      <div class="empty-actions">
+        <button type="button" class="primary" id="goRecord">첫 기록 입력하기</button>
+        <button type="button" class="ghost" id="loadSample">예시 데이터로 체험하기</button>
+      </div>
     </div>
   </section>
 
@@ -118,6 +171,12 @@
     <div class="compare-bar">
       <span id="compareStatus">기록 목록에서 비교할 회차의 체크박스를 선택하세요 (2개 이상)</span>
       <button class="ghost" id="clearCompare" style="border-color:#5a6a63;color:#e6ddc4;">선택 초기화</button>
+    </div>
+    <div class="quick-compare" id="quickCompare">
+      <span class="tools-label">빠른 선택</span>
+      <button type="button" class="ghost" data-quick="last2">최근 2회</button>
+      <button type="button" class="ghost" data-quick="firstlast">처음 ↔ 최근</button>
+      <button type="button" class="ghost" data-quick="all">전체</button>
     </div>
     <div id="avgBanner"></div>
 
@@ -170,36 +229,51 @@
   </div>
 </div>
 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
 (function(){
   const STORE_KEY = 'inbody_ledger_records_v1';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+  /* ---------- 저장소 (차단/용량 초과에도 죽지 않게) ---------- */
   let storageAvailable = true;
   let memoryFallback = null;
+
+  function showStorageWarning(msg){
+    if($('storageWarning')) return;
+    const b = document.createElement('div');
+    b.id = 'storageWarning';
+    b.className = 'storage-warning';
+    b.textContent = msg;
+    const cover = document.querySelector('.page-cover');
+    cover.parentNode.insertBefore(b, cover.nextSibling);
+  }
   function safeGet(){
     try{ return localStorage.getItem(STORE_KEY); }
     catch(e){ storageAvailable = false; return memoryFallback; }
   }
   function safeSet(value){
-    try{ localStorage.setItem(STORE_KEY, value); }
-    catch(e){ storageAvailable = false; memoryFallback = value; }
+    try{ localStorage.setItem(STORE_KEY, value); memoryFallback = null; }
+    catch(e){
+      storageAvailable = false;
+      memoryFallback = value;
+      showStorageWarning('⚠ 브라우저 저장소를 쓸 수 없거나 공간이 부족해, 기록이 지금 화면에서만 유지됩니다. 사진이 많다면 일부를 지우고, "기록 목록 → 내보내기"로 백업해 두세요.');
+    }
   }
 
   let records = [];
-  try{ records = JSON.parse(safeGet() || '[]'); } catch(e){ records = []; }
+  try{
+    const parsed = JSON.parse(safeGet() || '[]');
+    records = Array.isArray(parsed) ? parsed : [];
+  }catch(e){ records = []; }
+
   let compareSelection = new Set();
+  let editingId = null;
+  let pendingPhoto = null;
 
-  const $ = (id) => document.getElementById(id);
-
-  function showStorageWarningIfNeeded(){
-    if(storageAvailable) return;
-    const banner = document.createElement('div');
-    banner.className = 'storage-warning';
-    banner.textContent = '⚠ 이 미리보기 환경에서는 로컬 저장이 차단되어, 기록이 화면을 벗어나면(새로고침 등) 사라집니다. 파일을 다운로드해 브라우저로 직접 열면 정상적으로 저장됩니다.';
-    const cover = document.querySelector('.page-cover');
-    cover.parentNode.insertBefore(banner, cover.nextSibling);
-  }
-
+  /* ---------- 지표 정의 ---------- */
   const METRIC_DEFS = [
     { key:'weight',   label:'체중', unit:'kg', decimals:1 },
     { key:'height',   label:'신장', unit:'cm', decimals:1 },
@@ -215,36 +289,106 @@
     { key:'score',    label:'인바디 점수', unit:'점', decimals:0 },
   ];
   const LOWER_IS_BETTER = new Set(['bfm','pbf','visceral']);
-  const NEUTRAL_METRICS = new Set(['bmi','height']); // 증감을 좋다/나쁘다로 단정하지 않는 지표
+  const NEUTRAL_METRICS = new Set(['bmi','height']);
 
-  function save(){ safeSet(JSON.stringify(records)); renderAll(); }
+  const FIELDS = [
+    ['date','f_date'],['time','f_time'],['weight','f_weight'],['height','f_height'],['bmi','f_bmi'],
+    ['smm','f_smm'],['bfm','f_bfm'],['pbf','f_pbf'],['water','f_water'],['protein','f_protein'],['mineral','f_mineral'],
+    ['visceral','f_visceral'],['bmr','f_bmr'],['score','f_score'],['balance','f_balance'],
+    ['running','f_running'],['memo','f_memo']
+  ];
+
+  const byDateAsc = (a,b) => a.date.localeCompare(b.date);
+  const byDateDesc = (a,b) => b.date.localeCompare(a.date);
+  const hasVal = (v) => v !== '' && v !== undefined && v !== null && !isNaN(parseFloat(v));
+
   function fmt(v, decimals){
-    if(v === null || v === undefined || v === '' || isNaN(v)) return '—';
+    if(!hasVal(v)) return '—';
     return Number(v).toFixed(decimals);
+  }
+  function localDateStr(d){
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${d.getFullYear()}-${m}-${dd}`;
+  }
+  function todayStr(){ return localDateStr(new Date()); }
+  function daysFromToday(n){ const d = new Date(); d.setDate(d.getDate()+n); return localDateStr(d); }
+
+  function deltaInfo(key, cur, prev, decimals){
+    if(!hasVal(cur) || !hasVal(prev)) return null;
+    const d = parseFloat(cur) - parseFloat(prev);
+    let cls = 'flat', arrow = '–';
+    if(Math.abs(d) > 0.001){
+      arrow = d > 0 ? '▲' : '▼';
+      if(NEUTRAL_METRICS.has(key)) cls = 'neutral';
+      else {
+        const better = LOWER_IS_BETTER.has(key) ? d < 0 : d > 0;
+        cls = better ? 'up' : 'down';
+      }
+    }
+    return { cls, arrow, text: `${d>0?'+':''}${d.toFixed(decimals)}` };
+  }
+
+  /* ---------- 토스트 ---------- */
+  let toastTimer = null;
+  function toast(msg){
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> t.classList.remove('show'), 2400);
+  }
+
+  /* ---------- 저장 & 렌더 ---------- */
+  function save(){
+    records.sort(byDateAsc);
+    safeSet(JSON.stringify(records));
+    renderAll();
   }
 
   function switchTab(tab){
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
     $('panel-' + tab).classList.add('active');
+    if(tab === 'compare' && compareSelection.size === 0 && records.length >= 2){
+      selectQuick('last2');
+    }
   }
   document.querySelectorAll('.tab-btn').forEach(btn=>{
     btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
   });
 
+  /* ---------- BMI 자동 계산 + 신장 자동 채움 ---------- */
   function autoCalcBmi(){
     const w = parseFloat($('f_weight').value);
     const h = parseFloat($('f_height').value);
-    if(w && h){
-      const bmi = w / Math.pow(h/100, 2);
-      $('f_bmi').value = bmi.toFixed(1);
-    }
+    if(w && h){ $('f_bmi').value = (w / Math.pow(h/100, 2)).toFixed(1); }
   }
   $('f_weight').addEventListener('input', autoCalcBmi);
   $('f_height').addEventListener('input', autoCalcBmi);
 
-  let pendingPhoto = null;
-  $('photoDrop').addEventListener('click', ()=> $('f_photo').click());
+  function lastKnownHeight(){
+    const withH = [...records].sort(byDateDesc).find(r => hasVal(r.height));
+    return withH ? withH.height : '';
+  }
+
+  /* ---------- 사진 ---------- */
+  function setPhotoPreview(){
+    const d = $('photoDrop');
+    if(pendingPhoto){
+      d.innerHTML = `<img src="${pendingPhoto}" alt="선택한 사진 미리보기"><div>사진 선택됨 · 다시 클릭하면 변경</div><button type="button" class="link-btn" id="removePhoto">사진 빼기</button>`;
+    } else {
+      d.textContent = '사진을 선택하려면 클릭하세요';
+    }
+  }
+  $('photoDrop').addEventListener('click', (e)=>{
+    if(e.target && e.target.id === 'removePhoto'){ pendingPhoto = null; setPhotoPreview(); return; }
+    $('f_photo').value = '';
+    $('f_photo').click();
+  });
+  $('photoDrop').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $('f_photo').value=''; $('f_photo').click(); }
+  });
   $('f_photo').addEventListener('change', (e)=>{
     const file = e.target.files[0];
     if(!file) return;
@@ -252,7 +396,6 @@
     reader.onload = (ev)=>{
       const img = new Image();
       img.onload = ()=>{
-        // 긴 변 기준 1200px로 줄이고 JPEG로 압축 (로컬 저장 용량 절약)
         const MAX = 1200;
         const scale = Math.min(1, MAX / Math.max(img.width, img.height));
         const canvas = document.createElement('canvas');
@@ -260,129 +403,278 @@
         canvas.height = Math.round(img.height * scale);
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         pendingPhoto = canvas.toDataURL('image/jpeg', 0.82);
-        $('photoDrop').innerHTML = `<img src="${pendingPhoto}" alt="선택한 사진 미리보기"><div>사진 선택됨 (다시 클릭하면 변경)</div>`;
+        setPhotoPreview();
       };
-      img.onerror = ()=>{
-        pendingPhoto = ev.target.result;
-        $('photoDrop').innerHTML = `<img src="${pendingPhoto}" alt="선택한 사진 미리보기"><div>사진 선택됨 (다시 클릭하면 변경)</div>`;
-      };
+      img.onerror = ()=>{ pendingPhoto = ev.target.result; setPhotoPreview(); };
       img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
   });
 
-  $('recordForm').addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const rec = {
-      id: 'r' + Date.now(),
-      date: $('f_date').value,
-      time: $('f_time').value,
-      weight: $('f_weight').value,
-      height: $('f_height').value,
-      bmi: $('f_bmi').value,
-      smm: $('f_smm').value,
-      bfm: $('f_bfm').value,
-      pbf: $('f_pbf').value,
-      water: $('f_water').value,
-      protein: $('f_protein').value,
-      mineral: $('f_mineral').value,
-      visceral: $('f_visceral').value,
-      bmr: $('f_bmr').value,
-      score: $('f_score').value,
-      balance: $('f_balance').value,
-      running: $('f_running').value,
-      memo: $('f_memo').value,
-      photo: pendingPhoto,
-    };
-    records.push(rec);
-    records.sort((a,b)=> a.date.localeCompare(b.date));
-    save();
+  /* ---------- 폼: 새 기록 / 수정 ---------- */
+  function resetForm(){
     $('recordForm').reset();
     pendingPhoto = null;
-    $('photoDrop').innerHTML = '사진을 선택하려면 클릭하세요';
+    setPhotoPreview();
+    editingId = null;
+    $('formTitle').textContent = '새 측정 기록';
+    $('submitBtn').textContent = '기록 저장';
+    $('cancelEdit').style.display = 'none';
+    $('f_date').value = todayStr();
+    $('f_height').value = lastKnownHeight();
+  }
+
+  function startEdit(id){
+    const r = records.find(x => x.id === id);
+    if(!r) return;
+    editingId = id;
+    FIELDS.forEach(([k, el]) => { $(el).value = (r[k] == null ? '' : r[k]); });
+    pendingPhoto = r.photo || null;
+    setPhotoPreview();
+    $('formTitle').textContent = '기록 수정';
+    $('submitBtn').textContent = '수정 저장';
+    $('cancelEdit').style.display = 'inline-block';
+    switchTab('record');
+    $('panel-record').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  $('cancelEdit').addEventListener('click', ()=>{ resetForm(); switchTab('list'); });
+  $('resetBtn').addEventListener('click', resetForm);
+
+  $('recordForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const rec = { id: editingId || ('r' + Date.now()) };
+    FIELDS.forEach(([k, el]) => { rec[k] = $(el).value; });
+    rec.photo = pendingPhoto;
+
+    if(editingId){
+      const idx = records.findIndex(x => x.id === editingId);
+      if(idx >= 0) records[idx] = rec; else records.push(rec);
+      toast('수정했어요');
+    } else {
+      records.push(rec);
+      toast('기록을 저장했어요');
+    }
+    save();
+    resetForm();
     switchTab('list');
   });
 
-  $('resetBtn').addEventListener('click', ()=>{
-    $('recordForm').reset();
-    pendingPhoto = null;
-    $('photoDrop').innerHTML = '사진을 선택하려면 클릭하세요';
-  });
-
+  /* ---------- 삭제 / 비교 선택 ---------- */
   function deleteRecord(id){
     if(!confirm('이 기록을 삭제할까요? 되돌릴 수 없습니다.')) return;
-    records = records.filter(r=>r.id!==id);
+    records = records.filter(r => r.id !== id);
     compareSelection.delete(id);
+    if(editingId === id) resetForm();
     save();
+    toast('삭제했어요');
   }
   function toggleCompare(id, checked){
     if(checked) compareSelection.add(id); else compareSelection.delete(id);
     renderCompare();
     renderList();
   }
+  function selectQuick(mode){
+    const sorted = [...records].sort(byDateAsc);
+    compareSelection.clear();
+    if(mode === 'last2'){ sorted.slice(-2).forEach(r => compareSelection.add(r.id)); }
+    else if(mode === 'firstlast'){ if(sorted.length >= 2){ compareSelection.add(sorted[0].id); compareSelection.add(sorted[sorted.length-1].id); } }
+    else if(mode === 'all'){ sorted.forEach(r => compareSelection.add(r.id)); }
+    renderCompare();
+    renderList();
+  }
+  $('quickCompare').addEventListener('click', (e)=>{
+    const b = e.target.closest('[data-quick]');
+    if(!b) return;
+    if(records.length < 2){ toast('비교하려면 기록이 2개 이상 필요해요'); return; }
+    selectQuick(b.dataset.quick);
+  });
   $('clearCompare').addEventListener('click', ()=>{
     compareSelection.clear();
     renderCompare();
     renderList();
   });
 
+  /* ---------- 예시 데이터 ---------- */
+  function loadSample(){
+    const base = { time:'기상 직후 공복', height:'170', balance:'균형', running:'', memo:'', photo:null, sample:true };
+    const rows = [
+      { off:-56, weight:'68.2', bmi:'23.6', smm:'28.1', bfm:'15.4', pbf:'22.6', water:'38.9', protein:'10.4', mineral:'3.5', visceral:'6', bmr:'1498', score:'74' },
+      { off:-28, weight:'67.5', bmi:'23.4', smm:'28.6', bfm:'14.3', pbf:'21.2', water:'39.2', protein:'10.5', mineral:'3.5', visceral:'5', bmr:'1510', score:'76' },
+      { off:0,   weight:'67.1', bmi:'23.2', smm:'29.0', bfm:'13.4', pbf:'20.0', water:'39.5', protein:'10.6', mineral:'3.6', visceral:'5', bmr:'1521', score:'78' },
+    ];
+    rows.forEach((r, i) => {
+      const rec = Object.assign({}, base, r, { id: 'sample' + (i+1), date: daysFromToday(r.off) });
+      delete rec.off;
+      if(!records.some(x => x.id === rec.id)) records.push(rec);
+    });
+    save();
+    toast('예시 데이터를 불러왔어요');
+  }
+  function clearSamples(){
+    records = records.filter(r => !r.sample);
+    [...compareSelection].forEach(id => { if(!records.some(r => r.id === id)) compareSelection.delete(id); });
+    save();
+    toast('예시 데이터를 삭제했어요');
+  }
+  $('loadSample').addEventListener('click', ()=>{ loadSample(); });
+  $('goRecord').addEventListener('click', ()=> switchTab('record'));
+
+  /* ---------- 백업: 내보내기 / 가져오기 ---------- */
+  function download(filename, mime, content){
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 1500);
+  }
+  function exportable(){ return records.filter(r => !r.sample); }
+
+  $('exportJson').addEventListener('click', ()=>{
+    const list = exportable();
+    if(list.length === 0){ toast('내보낼 기록이 없어요'); return; }
+    const payload = { app:'inbody-ledger', version:1, exportedAt: new Date().toISOString(), records: list };
+    download(`inbody-backup-${todayStr()}.json`, 'application/json', JSON.stringify(payload));
+    toast(`${list.length}건을 내보냈어요`);
+  });
+
+  const CSV_COLS = [
+    ['date','측정일'],['time','측정시간대'],['weight','체중(kg)'],['height','신장(cm)'],['bmi','BMI'],
+    ['smm','골격근량(kg)'],['bfm','체지방량(kg)'],['pbf','체지방률(%)'],['water','체수분(L)'],
+    ['protein','단백질(kg)'],['mineral','무기질(kg)'],['visceral','내장지방레벨'],['bmr','기초대사량(kcal)'],
+    ['score','인바디점수'],['balance','좌우밸런스'],['running','주간러닝(km)'],['memo','메모']
+  ];
+  const csvCell = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+  $('exportCsv').addEventListener('click', ()=>{
+    const list = exportable().sort(byDateAsc);
+    if(list.length === 0){ toast('내보낼 기록이 없어요'); return; }
+    const lines = [CSV_COLS.map(c => csvCell(c[1])).join(',')];
+    list.forEach(r => lines.push(CSV_COLS.map(c => csvCell(r[c[0]])).join(',')));
+    download(`inbody-records-${todayStr()}.csv`, 'text/csv;charset=utf-8', '\uFEFF' + lines.join('\r\n'));
+    toast('CSV로 내보냈어요');
+  });
+
+  $('importBtn').addEventListener('click', ()=> $('importFile').click());
+  $('importFile').addEventListener('change', (e)=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{
+      try{
+        const data = JSON.parse(rd.result);
+        const arr = Array.isArray(data) ? data : data.records;
+        if(!Array.isArray(arr)) throw new Error('bad format');
+        const ids = new Set(records.map(r => r.id));
+        let added = 0;
+        arr.forEach(r => {
+          if(!r || typeof r.date !== 'string' || !hasVal(r.weight)) return;
+          const rec = {};
+          FIELDS.forEach(([k]) => { rec[k] = r[k] == null ? '' : String(r[k]); });
+          rec.photo = (typeof r.photo === 'string' && /^data:image\//.test(r.photo)) ? r.photo : null;
+          let id = (typeof r.id === 'string' && /^[\w-]+$/.test(r.id)) ? r.id : ('r' + Date.now() + Math.random().toString(36).slice(2,6));
+          if(ids.has(id)) return;
+          rec.id = id; ids.add(id);
+          records.push(rec); added++;
+        });
+        save();
+        toast(added ? `${added}건을 가져왔어요` : '새로 가져올 기록이 없어요 (이미 있는 기록)');
+      }catch(err){
+        toast('가져오기에 실패했어요. 내보내기로 저장한 JSON 파일인지 확인해 주세요.');
+      }
+      $('importFile').value = '';
+    };
+    rd.readAsText(f);
+  });
+
+  /* ---------- 렌더: 목록 ---------- */
+  const SUMMARY_KEYS = ['weight','smm','pbf','score'];
+
   function renderList(){
     const wrap = $('recordList');
     const empty = $('listEmpty');
+    const extra = $('listExtra');
     $('listCount').textContent = `(${records.length})`;
     $('footCount').textContent = `${records.length}`;
+
     if(records.length === 0){
       wrap.innerHTML = '';
+      extra.innerHTML = '';
       empty.style.display = 'block';
       return;
     }
     empty.style.display = 'none';
-    const sorted = [...records].sort((a,b)=> b.date.localeCompare(a.date));
+
+    const sorted = [...records].sort(byDateDesc);
+    let extraHtml = '';
+
+    if(records.some(r => r.sample)){
+      extraHtml += `<div class="sample-banner"><span>예시 데이터가 포함되어 있어요. 체크해서 비교해 보며 사용법을 익혀 보세요.</span><button type="button" class="ghost" onclick="window.__inbody.clearSamples()">예시 데이터 삭제</button></div>`;
+    }
+
+    if(sorted.length >= 2){
+      const chips = SUMMARY_KEYS.map(key => {
+        const def = METRIC_DEFS.find(m => m.key === key);
+        if(!hasVal(sorted[0][key])) return '';
+        const prevRec = sorted.slice(1).find(r => hasVal(r[key]));
+        if(!prevRec) return '';
+        const di = deltaInfo(key, sorted[0][key], prevRec[key], def.decimals);
+        return `<div class="chip"><div class="k">${def.label}</div><div class="v">${fmt(sorted[0][key], def.decimals)}<span class="unit">${def.unit}</span></div><div class="delta ${di.cls}">${di.arrow} ${di.text}</div></div>`;
+      }).join('');
+      if(chips) extraHtml += `<div class="summary-strip"><div class="summary-title">최근 기록 vs 직전 기록</div><div class="chips">${chips}</div></div>`;
+    }
+    extra.innerHTML = extraHtml;
 
     wrap.innerHTML = sorted.map((r) => {
       const selected = compareSelection.has(r.id);
-      const seqNo = String(records.length - records.findIndex(x=>x.id===r.id)).padStart(3,'0');
-      const metricsHtml = METRIC_DEFS.map(m=>{
-        const v = r[m.key];
-        if(v==='' || v===undefined || v===null) return '';
-        return `<div class="metric"><div class="k">${m.label}</div><div class="v">${fmt(v, m.decimals)}<span class="unit">${m.unit}</span></div></div>`;
+      const seqNo = String(records.findIndex(x => x.id === r.id) + 1).padStart(3,'0');
+      const metricsHtml = METRIC_DEFS.map(m => {
+        if(!hasVal(r[m.key])) return '';
+        return `<div class="metric"><div class="k">${m.label}</div><div class="v">${fmt(r[m.key], m.decimals)}<span class="unit">${m.unit}</span></div></div>`;
       }).join('');
+      const memoParts = [];
+      if(r.balance) memoParts.push(`<b>밸런스</b> · ${esc(r.balance)}`);
+      if(r.memo) memoParts.push(esc(r.memo));
       return `
-      <div class="rcard ${selected ? 'selected':''}">
+      <div class="rcard ${selected ? 'selected' : ''}">
         <div class="tab">
           <div class="hole"></div>
           <div class="seq">NO.${seqNo}</div>
         </div>
         <div class="body">
           <div class="rhead">
-            <span class="date">${r.date}</span>
-            ${r.time ? `<span class="condition">${r.time}</span>` : ''}
-            ${r.running ? `<span class="condition">주간 러닝 ${r.running}km</span>` : ''}
+            <span class="date">${esc(r.date)}${r.sample ? ' <span class="sample-tag">예시</span>' : ''}</span>
+            ${r.time ? `<span class="condition">${esc(r.time)}</span>` : ''}
+            ${r.running ? `<span class="condition">주간 러닝 ${esc(r.running)}km</span>` : ''}
             <div class="rhead-actions">
-              <label><input type="checkbox" ${selected?'checked':''} onchange="window.__inbody.toggleCompare('${r.id}', this.checked)"> 비교</label>
-              <button class="del" onclick="window.__inbody.deleteRecord('${r.id}')">삭제</button>
+              <label><input type="checkbox" ${selected ? 'checked' : ''} onchange="window.__inbody.toggleCompare('${r.id}', this.checked)"> 비교</label>
+              <button type="button" class="edit" onclick="window.__inbody.startEdit('${r.id}')">수정</button>
+              <button type="button" class="del" onclick="window.__inbody.deleteRecord('${r.id}')">삭제</button>
             </div>
           </div>
           <div class="metrics">${metricsHtml || '<div class="metric"><div class="k">비고</div><div class="v">기본 항목만 입력됨</div></div>'}</div>
           ${r.photo ? `<button type="button" class="photo-btn" onclick="window.__inbody.openPhoto('${r.id}')" aria-label="눈바디 사진 크게 보기">
-            <img src="${r.photo}" alt="${r.date} 눈바디 사진">
+            <img src="${r.photo}" alt="${esc(r.date)} 눈바디 사진">
             <span class="photo-hint">눈바디 · 클릭하면 크게 보기</span>
           </button>` : ''}
-          ${r.balance ? `<div class="memo"><b>밸런스</b> · ${r.balance}${r.memo ? ' · ' + r.memo : ''}</div>` : (r.memo ? `<div class="memo">${r.memo}</div>` : '')}
+          ${memoParts.length ? `<div class="memo">${memoParts.join(' · ')}</div>` : ''}
         </div>
       </div>`;
     }).join('');
   }
 
+  /* ---------- 렌더: 비교 ---------- */
   function renderCompare(){
     const wrap = $('compareWrap');
     const status = $('compareStatus');
     const avgBanner = $('avgBanner');
-    const selected = records.filter(r=>compareSelection.has(r.id)).sort((a,b)=>a.date.localeCompare(b.date));
+    const selected = records.filter(r => compareSelection.has(r.id)).sort(byDateAsc);
 
     if(selected.length < 2){
-      status.textContent = `기록 목록에서 비교할 회차의 체크박스를 선택하세요 (현재 ${selected.length}개 선택됨, 2개 이상 필요)`;
-      wrap.innerHTML = `<div class="compare-empty">2개 이상의 기록을 선택하면 나란히 비교표가 나타납니다.</div>`;
+      status.textContent = records.length < 2
+        ? '비교하려면 기록이 2개 이상 필요해요'
+        : `비교할 회차를 2개 이상 골라주세요 (현재 ${selected.length}개) — 위의 빠른 선택을 써도 돼요`;
+      wrap.innerHTML = `<div class="compare-empty">2개 이상의 기록을 선택하면 비교표와 막대그래프가 나타납니다.</div>`;
       avgBanner.innerHTML = '';
       $('chartControls').style.display = 'none';
       $('chartWrap').innerHTML = '';
@@ -390,63 +682,45 @@
     }
     status.textContent = `${selected.length}개 회차 비교 중 (${selected[0].date} → ${selected[selected.length-1].date})`;
 
-    const allSorted = [...records].sort((a,b)=>b.date.localeCompare(a.date));
+    const allSorted = [...records].sort(byDateDesc);
+    avgBanner.innerHTML = '';
     if(allSorted.length >= 2){
       const recent3 = allSorted.slice(0,3);
       const latest = allSorted[0];
-      const valid = recent3.filter(r=>r.weight!=='');
-      const avgWeight = valid.length ? valid.reduce((s,r)=> s + (parseFloat(r.weight)||0),0) / valid.length : null;
-      if(avgWeight){
-        const diff = (parseFloat(latest.weight) - avgWeight);
+      const valid = recent3.filter(r => hasVal(r.weight));
+      if(valid.length && hasVal(latest.weight)){
+        const avgWeight = valid.reduce((s,r) => s + parseFloat(r.weight), 0) / valid.length;
+        const diff = parseFloat(latest.weight) - avgWeight;
         avgBanner.innerHTML = `<div class="avg-banner"><span><b>최근 ${recent3.length}회 평균 체중</b> ${avgWeight.toFixed(1)}kg</span><span><span class="tag">이번 회차</span> ${fmt(latest.weight,1)}kg (${diff>=0?'+':''}${diff.toFixed(1)}kg)</span></div>`;
-      } else { avgBanner.innerHTML = ''; }
-    } else { avgBanner.innerHTML = ''; }
+      }
+    }
 
     let html = `<table class="compare"><thead><tr><th>항목</th>`;
-    selected.forEach(r=> html += `<th>${r.date}${r.time ? `<br><span style="font-weight:400;font-size:11px;color:var(--ink-soft)">${r.time}</span>`:''}</th>`);
+    selected.forEach(r => html += `<th>${esc(r.date)}${r.time ? `<br><span class="th-sub">${esc(r.time)}</span>` : ''}</th>`);
     html += `</tr></thead><tbody>`;
 
-    METRIC_DEFS.forEach(m=>{
-      const anyVal = selected.some(r=> r[m.key] !== '' && r[m.key] !== undefined);
-      if(!anyVal) return;
-      html += `<tr><th>${m.label}<br><span style="font-size:10px;">${m.unit||''}</span></th>`;
-      selected.forEach((r,i)=>{
-        const v = r[m.key];
-        const num = v==='' || v===undefined ? null : parseFloat(v);
+    METRIC_DEFS.forEach(m => {
+      if(!selected.some(r => hasVal(r[m.key]))) return;
+      html += `<tr><th>${m.label}${m.unit ? `<br><span class="th-unit">${m.unit}</span>` : ''}</th>`;
+      selected.forEach((r, i) => {
         let deltaHtml = '';
-        if(i>0 && num !== null){
-          const prev = selected[i-1][m.key];
-          const prevNum = prev==='' || prev===undefined ? null : parseFloat(prev);
-          if(prevNum !== null){
-            const d = num - prevNum;
-            let cls = 'flat';
-            let arrow = '–';
-            if(Math.abs(d) > 0.001){
-              arrow = d > 0 ? '▲' : '▼';
-              if(NEUTRAL_METRICS.has(m.key)){
-                cls = 'neutral';
-              } else {
-                const better = LOWER_IS_BETTER.has(m.key) ? d < 0 : d > 0;
-                cls = better ? 'up' : 'down';
-              }
-            }
-            const sign = d>0?'+':'';
-            deltaHtml = `<span class="delta ${cls}">${arrow} ${sign}${d.toFixed(m.decimals)}</span>`;
-          }
+        if(i > 0){
+          const di = deltaInfo(m.key, r[m.key], selected[i-1][m.key], m.decimals);
+          if(di) deltaHtml = `<span class="delta ${di.cls}">${di.arrow} ${di.text}</span>`;
         }
-        html += `<td>${fmt(v, m.decimals)}${deltaHtml}</td>`;
+        html += `<td>${fmt(r[m.key], m.decimals)}${deltaHtml}</td>`;
       });
       html += `</tr>`;
     });
 
-    if(selected.some(r=>r.balance)){
+    if(selected.some(r => r.balance)){
       html += `<tr><th>좌우 밸런스</th>`;
-      selected.forEach(r=> html += `<td>${r.balance || '—'}</td>`);
+      selected.forEach(r => html += `<td>${esc(r.balance) || '—'}</td>`);
       html += `</tr>`;
     }
-    if(selected.some(r=>r.running)){
-      html += `<tr><th>주간 러닝<br><span style="font-size:10px;">km</span></th>`;
-      selected.forEach(r=> html += `<td>${r.running || '—'}</td>`);
+    if(selected.some(r => r.running)){
+      html += `<tr><th>주간 러닝<br><span class="th-unit">km</span></th>`;
+      selected.forEach(r => html += `<td>${esc(r.running) || '—'}</td>`);
       html += `</tr>`;
     }
     html += `</tbody></table>`;
@@ -458,24 +732,21 @@
   function renderChartControls(selected){
     const controls = $('chartControls');
     const select = $('chartMetric');
-    const available = METRIC_DEFS.filter(m => selected.some(r => r[m.key] !== '' && r[m.key] !== undefined));
+    const available = METRIC_DEFS.filter(m => selected.filter(r => hasVal(r[m.key])).length >= 2);
     if(available.length === 0){
       controls.style.display = 'none';
       $('chartWrap').innerHTML = '';
       return;
     }
     controls.style.display = 'flex';
-
     const prevValue = select.value;
     const keep = available.some(m => m.key === prevValue);
-    select.innerHTML = available.map(m => `<option value="${m.key}">${m.label}${m.unit ? ' ('+m.unit+')' : ''}</option>`).join('');
-    select.value = keep ? prevValue : (available.find(m=>m.key==='weight') ? 'weight' : available[0].key);
-
+    select.innerHTML = available.map(m => `<option value="${m.key}">${m.label}${m.unit ? ' (' + m.unit + ')' : ''}</option>`).join('');
+    select.value = keep ? prevValue : (available.some(m => m.key === 'weight') ? 'weight' : available[0].key);
     renderBarChart(selected, select.value);
   }
-
   $('chartMetric').addEventListener('change', ()=>{
-    const selected = records.filter(r=>compareSelection.has(r.id)).sort((a,b)=>a.date.localeCompare(b.date));
+    const selected = records.filter(r => compareSelection.has(r.id)).sort(byDateAsc);
     renderBarChart(selected, $('chartMetric').value);
   });
 
@@ -483,46 +754,35 @@
     const def = METRIC_DEFS.find(m => m.key === metricKey);
     const wrap = $('chartWrap');
     if(!def){ wrap.innerHTML = ''; return; }
-
-    const points = selected
-      .filter(r => r[metricKey] !== '' && r[metricKey] !== undefined)
-      .map(r => ({ date: r.date, time: r.time, value: parseFloat(r[metricKey]) }));
-
-    if(points.length < 2){
-      wrap.innerHTML = `<div class="compare-empty">선택된 회차 중 '${def.label}' 값이 2개 이상 있어야 그래프로 표시됩니다.</div>`;
-      return;
-    }
+    const points = selected.filter(r => hasVal(r[metricKey]))
+      .map(r => ({ date:r.date, time:r.time, value: parseFloat(r[metricKey]) }));
+    if(points.length < 2){ wrap.innerHTML = ''; return; }
 
     const values = points.map(p => p.value);
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    const range = max - min;
-    const maxVal = max;
-
+    const max = Math.max(...values), min = Math.min(...values), range = max - min;
     const bars = points.map(p => {
-      let pct;
-      if(range < 0.0001){ pct = 60; }
-      else{ pct = 18 + ((p.value - min) / range) * 78; } // 18%~96% 사이로 스케일, 최솟값도 보이게
-      const isMax = p.value === maxVal;
-      return `<div class="bar-col ${isMax ? 'is-max' : ''}">
-        <div class="bar-value">${p.value.toFixed(def.decimals)}${def.unit ? '<span style=\"font-weight:400;color:var(--ink-soft);font-size:10px;\"> '+def.unit+'</span>' : ''}</div>
+      const pct = range < 0.0001 ? 60 : 18 + ((p.value - min) / range) * 78;
+      return `<div class="bar-col ${p.value === max ? 'is-max' : ''}">
+        <div class="bar-value">${p.value.toFixed(def.decimals)}${def.unit ? `<span class="bar-unit"> ${def.unit}</span>` : ''}</div>
         <div class="bar-shape" style="height:${pct}%;"></div>
       </div>`;
     }).join('');
-
-    const labels = points.map(p => `<div class="bar-label">${p.date.slice(5)}${p.time ? `<br>${p.time}` : ''}</div>`).join('');
+    const labels = points.map(p => `<div class="bar-label">${esc(p.date.slice(5))}${p.time ? `<br>${esc(p.time)}` : ''}</div>`).join('');
 
     wrap.innerHTML = `
       <div class="bar-chart">
-        <div class="chart-title">${def.label} 변화 타임라인 (${points[0].date} → ${points[points.length-1].date})</div>
+        <div class="chart-title">${def.label} 변화 타임라인 (${esc(points[0].date)} → ${esc(points[points.length-1].date)})</div>
         <div class="bar-track">${bars}</div>
         <div class="bar-labels">${labels}</div>
+        <div class="chart-note">막대 높이는 선택한 회차 안에서의 상대 비교입니다. 정확한 값은 막대 위 숫자를 확인하세요.</div>
       </div>`;
   }
 
   function renderAll(){ renderList(); renderCompare(); }
+
+  /* ---------- 사진 라이트박스 ---------- */
   function openPhoto(id){
-    const r = records.find(x=>x.id===id);
+    const r = records.find(x => x.id === id);
     if(!r || !r.photo) return;
     $('lightboxImg').src = r.photo;
     $('lightboxImg').alt = `${r.date} 눈바디 사진`;
@@ -542,11 +802,14 @@
   $('lightbox').addEventListener('click', (e)=>{ if(e.target === $('lightbox')) closePhoto(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && !$('lightbox').hidden) closePhoto(); });
 
-  window.__inbody = { deleteRecord, toggleCompare, openPhoto };
+  window.__inbody = { deleteRecord, toggleCompare, openPhoto, startEdit, clearSamples };
 
-  $('f_date').value = new Date().toISOString().slice(0,10);
+  /* ---------- 초기화 ---------- */
+  resetForm();
   renderAll();
-  showStorageWarningIfNeeded();
+  if(!storageAvailable){
+    showStorageWarning('⚠ 이 미리보기 환경에서는 로컬 저장이 차단되어, 기록이 화면을 벗어나면(새로고침 등) 사라집니다. 파일을 내려받아 브라우저로 직접 열면 정상적으로 저장됩니다.');
+  }
 })();
 </script>
 
