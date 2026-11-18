@@ -4,8 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>인바디 기록 도구 — 회차별 기록 &amp; 비교 | 인바디 기록부</title>
-<meta name="description" content="인바디 결과를 측정할 때마다 입력해 회차별로 기록하고, 두 개 이상의 회차를 선택해 변화를 표와 화살표로 비교하는 무료 도구입니다.">
+<meta name="description" content="인바디 결과를 회차별로 기록하고, 여러 회차를 비교표와 막대그래프로 한눈에 비교하는 무료 도구입니다. BMI 자동 계산, 눈바디 사진 보관, 백업(JSON·CSV)을 지원합니다.">
 <link rel="canonical" href="https://inbody-tracker-vert.vercel.app/tracker.html">
+<!-- seo:start -->
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="theme-color" content="#1b3a30">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta property="og:site_name" content="인바디 기록부">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:type" content="website">
+<meta property="og:title" content="인바디 기록 도구 — 회차별 기록 &amp; 비교 | 인바디 기록부">
+<meta property="og:description" content="인바디 결과를 회차별로 기록하고, 여러 회차를 비교표와 막대그래프로 한눈에 비교하는 무료 도구입니다. BMI 자동 계산, 눈바디 사진 보관, 백업(JSON·CSV)을 지원합니다.">
+<meta property="og:url" content="https://inbody-tracker-vert.vercel.app/tracker.html">
+<meta property="og:image" content="https://inbody-tracker-vert.vercel.app/img/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="인바디 기록부 — 인바디 결과 기록·비교 도구와 항목별 해석 가이드">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="인바디 기록 도구 — 회차별 기록 &amp; 비교 | 인바디 기록부">
+<meta name="twitter:description" content="인바디 결과를 회차별로 기록하고, 여러 회차를 비교표와 막대그래프로 한눈에 비교하는 무료 도구입니다. BMI 자동 계산, 눈바디 사진 보관, 백업(JSON·CSV)을 지원합니다.">
+<meta name="twitter:image" content="https://inbody-tracker-vert.vercel.app/img/og-image.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://inbody-tracker-vert.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "기록 도구",
+      "item": "https://inbody-tracker-vert.vercel.app/tracker.html"
+    }
+  ]
+}
+</script>
+<!-- seo:end -->
 <meta name="naver-site-verification" content="7c5803e0667ca97e8ee6781f5c3fd69aa331b6ec" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;900&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -188,6 +229,22 @@
 
     <div class="compare-table-wrap" id="compareWrap"></div>
   </section>
+  <article class="doc" id="how-to" style="margin-top:28px;">
+    <h2>인바디 기록 도구 사용법</h2>
+    <p>인바디 기록 도구는 측정할 때마다 결과지의 수치를 입력해 회차별로 쌓아 두고, 나중에 두 회차 이상을 골라 변화를 한눈에 비교하는 무료 도구입니다. 회원가입이 필요 없고, 입력한 기록은 서버로 전송되지 않고 사용 중인 브라우저에만 저장됩니다.</p>
+    <ol>
+      <li><strong>기록 추가</strong> — 측정일과 체중만 입력해도 저장됩니다. 신장을 함께 입력하면 BMI가 자동으로 계산되고, 골격근량·체지방량·체지방률·내장지방레벨 같은 항목과 측정 시간대, 메모, 눈바디 사진은 필요한 만큼만 채우면 됩니다.</li>
+      <li><strong>기록 목록</strong> — 저장한 기록이 최신순 카드로 쌓이고, 가장 최근 기록이 직전 기록보다 얼마나 달라졌는지 요약해서 보여줍니다. 잘못 입력한 값은 수정 버튼으로 고칠 수 있습니다.</li>
+      <li><strong>비교하기</strong> — 비교할 회차를 2개 이상 고르거나 빠른 선택(최근 2회, 처음과 최근, 전체)을 누르면 비교표와 막대그래프가 나타납니다. 체지방량·체지방률·내장지방레벨은 줄어들면 좋은 변화로, 골격근량 등은 늘어나면 좋은 변화로 색을 달리 표시하고, BMI는 좋고 나쁨을 단정하지 않고 중립 색으로 보여줍니다.</li>
+      <li><strong>백업과 기기 이동</strong> — 기록 목록 탭의 내보내기(JSON)로 백업 파일을 저장해 두면, 브라우저를 바꾸거나 다른 기기에서 가져오기로 그대로 복원할 수 있습니다. 엑셀이나 구글 시트로 보고 싶다면 CSV로 내보내세요.</li>
+    </ol>
+    <h3>기록할 때 알아두면 좋은 점</h3>
+    <ul>
+      <li>인바디 수치는 식사, 수분 섭취, 운동 여부에 따라 같은 날에도 달라질 수 있으니 가능하면 기상 직후 공복처럼 같은 조건에서 재고, 측정 시간대 칸에 함께 남겨 두세요.</li>
+      <li>기록은 이 브라우저에만 저장되므로 브라우저 데이터를 지우면 사라집니다. 중요한 기록은 가끔 JSON으로 내보내 보관하세요.</li>
+      <li>각 항목의 뜻이 헷갈린다면 <a href="guide.html">인바디 항목별 가이드</a>에서 체중, BMI, 골격근량, 체지방률, 내장지방레벨 등을 쉬운 말로 확인할 수 있습니다.</li>
+    </ul>
+  </article>
 </main>
 
 <div class="ad-slot">

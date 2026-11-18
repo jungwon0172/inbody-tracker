@@ -876,3 +876,18 @@ table.doc-table tbody td:first-child{ font-weight: 700; color: var(--teal-dark);
   .grid{ grid-template-columns: repeat(2, 1fr); }
   .field input, .field select, .field textarea{ font-size: 16px; } /* iOS 자동 확대 방지 */
 }
+
+
+/* ===== SEO: 목차 / 주제 링크 ===== */
+nav.toc{ background: var(--paper); border: 1px solid var(--line-soft); border-radius: 8px; padding: 14px 18px; margin: 14px 0 20px; }
+nav.toc .toc-title{ font-family:'Noto Serif KR', serif; font-weight: 700; font-size: 13.5px; color: var(--teal-dark); margin-bottom: 8px; }
+nav.toc ol{ margin: 0; padding-left: 22px; columns: 2; column-gap: 28px; font-size: 13.5px; line-height: 1.9; }
+nav.toc li{ margin: 0; break-inside: avoid; }
+nav.toc a{ color: var(--ink-soft); text-decoration: none; }
+nav.toc a:hover{ color: var(--teal-dark); text-decoration: underline; }
+article.doc h2[id]{ scroll-margin-top: 90px; }
+ul.topic-links{ list-style: none; padding: 0; margin: 0 0 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+ul.topic-links li{ margin: 0; }
+ul.topic-links a{ display: block; padding: 10px 14px; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--paper); text-decoration: none; font-size: 13.5px; color: var(--teal-dark); }
+ul.topic-links a:hover{ border-color: var(--brass); }
+@media (max-width: 560px){ nav.toc ol{ columns: 1; } }
